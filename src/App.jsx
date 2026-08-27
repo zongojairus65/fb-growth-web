@@ -58,7 +58,10 @@ export default function App() {
     }
   };
 
-  if (error && step !== STEPS.USERNAME) {
+  // L'écran d'erreur plein écran ne s'affiche que pour les étapes SANS
+  // écran dédié pour montrer l'erreur inline (USERNAME et SCAN l'affichent
+  // eux-mêmes désormais, pour ne jamais échouer silencieusement).
+  if (error && step !== STEPS.USERNAME && step !== STEPS.SCAN) {
     return (
       <div className="min-h-screen app-shell flex items-center justify-center px-6">
         <div className="max-w-md text-center">
@@ -80,7 +83,7 @@ export default function App() {
 
   switch (step) {
     case STEPS.USERNAME:
-      return <UsernameScreen onSubmit={handleUsernameSubmit} />;
+      return <UsernameScreen onSubmit={handleUsernameSubmit} error={error} />;
 
     case STEPS.SCAN:
       return (
@@ -91,7 +94,10 @@ export default function App() {
             setDiagnostic(result);
             setStep(STEPS.DIAGNOSTIC);
           }}
-          onError={(msg) => setError(msg)}
+          onError={(msg) => {
+            setError(msg);
+            setStep(STEPS.USERNAME);
+          }}
         />
       );
 

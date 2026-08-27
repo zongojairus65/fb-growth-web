@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ContinueButton from "../components/ContinueButton.jsx";
 
-export default function UsernameScreen({ onSubmit }) {
+export default function UsernameScreen({ onSubmit, error }) {
   const [username, setUsername] = useState("");
 
   return (
@@ -13,7 +13,7 @@ export default function UsernameScreen({ onSubmit }) {
           Notre IA scanne ton profil public en profondeur pour identifier tes forces, tes points faibles, et ta prochaine stratégie de contenu.
         </p>
 
-        <div className="rounded-full bg-card border border-white/10 px-5 py-4 flex items-center gap-2 mb-8">
+        <div className="rounded-full bg-card border border-white/10 px-5 py-4 flex items-center gap-2 mb-4">
           <span className="text-white/50">@</span>
           <input
             value={username}
@@ -23,6 +23,8 @@ export default function UsernameScreen({ onSubmit }) {
             aria-label="Nom d'utilisateur Facebook"
           />
         </div>
+
+        {error && <p className="text-rose-400 text-sm mb-4 text-center">{error}</p>}
 
         <ContinueButton
           filled
