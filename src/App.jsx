@@ -22,7 +22,8 @@ const STEPS = {
 
 export default function App() {
   const [step, setStep] = useState(STEPS.USERNAME);
-  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState(""); // username OU page_id, pour l'affichage
+  const [diagnosticInput, setDiagnosticInput] = useState(null); // {fb_username} ou {fb_page_id, fb_page_token}
   const [profileId, setProfileId] = useState(null);
   const [diagnostic, setDiagnostic] = useState(null);
   const [strategyAudience, setStrategyAudience] = useState("");
@@ -31,11 +32,16 @@ export default function App() {
   const [error, setError] = useState("");
   const [strategyLoading, setStrategyLoading] = useState(false);
 
-  const handleUsernameSubmit = async (name) => {
-    setUsername(name);
+  const handleUsernameSubmit = async ({ mode, fb_username, fb_page_id, fb_page_token }) => {
     setError("");
+    const label = mode === "username" ? fb_username : fb_page_id;
+    setDisplayName(label);
+    setDiagnosticInput(mode === "username" ? { fb_username } : { fb_page_id, fb_page_token });
+
     try {
-      const { profile_id } = await api.createProfile({ fb_username: name });
+      const { profile_id } = await api.createProfile(
+        mode === "username" ? { fb_username } : { fb_page_id }
+      );
       setProfileId(profile_id);
       setStep(STEPS.SCAN);
     } catch (e) {
@@ -58,9 +64,6 @@ export default function App() {
     }
   };
 
-  // L'écran d'erreur plein écran ne s'affiche que pour les étapes SANS
-  // écran dédié pour montrer l'erreur inline (USERNAME et SCAN l'affichent
-  // eux-mêmes désormais, pour ne jamais échouer silencieusement).
   if (error && step !== STEPS.USERNAME && step !== STEPS.SCAN) {
     return (
       <div className="min-h-screen app-shell flex items-center justify-center px-6">
@@ -88,8 +91,9 @@ export default function App() {
     case STEPS.SCAN:
       return (
         <ScanScreen
-          username={username}
+          username={displayName}
           profileId={profileId}
+          diagnosticInput={diagnosticInput}
           onDone={(result) => {
             setDiagnostic(result);
             setStep(STEPS.DIAGNOSTIC);
@@ -105,7 +109,7 @@ export default function App() {
       return (
         <DiagnosticScreen
           diagnostic={diagnostic}
-          username={username}
+          username={displayName}
           onBack={() => setStep(STEPS.USERNAME)}
           onContinue={() => setStep(STEPS.QUIZ)}
         />

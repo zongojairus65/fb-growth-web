@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api.js";
 
 const FALLBACK_STEPS = [
-  { pct: 15, label: "Récupération du profil public" },
-  { pct: 35, label: "Lecture des statistiques du compte" },
+  { pct: 15, label: "Récupération du profil" },
+  { pct: 35, label: "Lecture des statistiques" },
   { pct: 60, label: "Analyse des posts récents" },
   { pct: 85, label: "Analyse IA en cours" },
   { pct: 100, label: "Diagnostic prêt" },
 ];
 
-export default function ScanScreen({ username, profileId, onDone, onError }) {
+export default function ScanScreen({ username, profileId, diagnosticInput, onDone, onError }) {
   const [steps, setSteps] = useState(FALLBACK_STEPS);
   const [current, setCurrent] = useState(0);
   const hasFetched = useRef(false);
@@ -28,7 +28,7 @@ export default function ScanScreen({ username, profileId, onDone, onError }) {
     if (!hasFetched.current) {
       hasFetched.current = true;
       api
-        .runDiagnostic({ profile_id: profileId, fb_username: username, niche_hint: "" })
+        .runDiagnostic({ profile_id: profileId, niche_hint: "", ...diagnosticInput })
         .then((result) => {
           clearInterval(interval);
           setCurrent(steps.length - 1);
@@ -50,7 +50,7 @@ export default function ScanScreen({ username, profileId, onDone, onError }) {
     <div className="min-h-screen app-shell flex flex-col px-6">
       <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full text-center">
         <h1 className="text-2xl font-bold mb-2">Analyse de ton compte</h1>
-        <p className="text-muted mb-16">Patiente quelques secondes : on analyse @{username}...</p>
+        <p className="text-muted mb-16">Patiente quelques secondes : on analyse {username}...</p>
 
         <div className="relative w-40 h-40 mb-10">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
